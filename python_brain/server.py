@@ -24,7 +24,7 @@ except ImportError:
 OBS_DIM        = 465     # Son 3 adımın hafızası (155 * 3)
 GAMMA          = 0.99
 EPS_CLIP       = 0.2
-ENTROPY_COEF   = 0.001   # Rastgeleliği azalttık, artık ne öğrendiyse uygulayacak!
+ENTROPY_COEF   = 0.01   # Rastgeleliği azalttık, artık ne öğrendiyse uygulayacak!
 UPDATE_TIMESTEP = 1000
 K_EPOCHS       = 4
 LR             = 3e-4
@@ -200,8 +200,15 @@ def train_ppo(memory: AgentMemory, agent_id: str):
                 lp_mouse_now = dist_mouse.log_prob(old_mouse).sum(dim=1)
                 entropy_mouse = dist_mouse.entropy().sum(dim=1).mean()
 
-                advantages   = rewards_t - state_values.squeeze(-1).detach()
-                ratios = (torch.exp(lp_btn_now - old_lp_btn) + torch.exp(lp_mouse_now - old_lp_mouse)) / 2.0
+                # ✅ DOĞRU ratio hesaplaması
+                lp_old = old_lp_btn + old_lp_mouse
+                lp_now = lp_btn_now + lp_mouse_now
+                ratios = torch.exp(lp_now - lp_old)
+
+                # ✅ Advantage normalizasyonu
+                advantages = rewards_t - state_values.squeeze(-1).detach()
+                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
                 surr1 = ratios * advantages
                 surr2 = torch.clamp(ratios, 1 - EPS_CLIP, 1 + EPS_CLIP) * advantages
 
@@ -224,11 +231,10 @@ def train_ppo(memory: AgentMemory, agent_id: str):
             writer.add_scalar("2_Beyin/Deger_Tahmini_Critic", state_values.mean().item(), global_step)
             
             torch.save(global_brain.state_dict(), "brain.pth")
-            print(f"✅ [{agent_id}] Eğitim tamamlandı. Kayıp: {loss.item():.4f}")
+            print(f"✅ [{agent_id}] Eğitim tamamlandı. Kayıp: {loss.item():.4f} | Ödül: {avg_reward:.4f} | Critic: {state_values.mean().item():.4f}")
         finally:
             is_training = False
     memory.clear()
-
 # ---------------------------------------------------------------------------
 # GRPC BAĞLANTISI
 # ---------------------------------------------------------------------------

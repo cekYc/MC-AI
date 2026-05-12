@@ -27,8 +27,8 @@ mcAI is a high-performance, multi-agent reinforcement learning framework for Min
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/mcAI.git
-   cd mcAI
+   git clone https://github.com/cekYc/MC-AI.git
+   cd MC-AI
    ```
 
 2. **Setup the Python Brain:**

@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package swarm;
+
+service BrainService {
+  // Unary yerine çift yönlü akış (Bidirectional Streaming) kullanıyoruz.
+  // Bu sayede TCP el sıkışma maliyetinden kurtulup, saniyede yüzlerce 
+  // paketi gecikmesiz iletebiliriz.
+  rpc StreamActions (stream Observation) returns (stream Action);
+}
+
+message Observation {
+  string agent_id = 1;
+  
+  // 5x5x5 grid (125 int32)
+  repeated int32 block_grid = 2;
+  
+  float health = 3;
+  float hunger = 4;
+  
+  // Keşif Ödülü için Koordinatlar
+  double position_x = 5;
+  double position_y = 6;
+  double position_z = 7;
+  
+  // ÖNEMLİ: AI modelinin çökmemesi için Python tarafında 
+  // bu array her zaman sabit bir sayıya (örn: max 5) sabitlenmeli.
+  repeated Entity entities = 8;
+  
+  // Sürü İletişimi
+  bool dost_bana_vurdu = 9;
+  float vuran_dost_yaw = 10;   // Botun nereye döneceğini bilmesi için eklendi
+  float vuran_dost_pitch = 11; 
+}
+
+message Entity {
+  int32 entity_id = 1;
+  int32 entity_type = 2;
+  float distance = 3;
+  float relative_yaw = 4;
+  float relative_pitch = 5;
+}
+
+message Action {
+  // Discrete (Ayrık) Eylemler - Bitmask Optimizasyonu
+  // bit 0: forward, bit 1: backward, bit 2: left, bit 3: right
+  // bit 4: jump, bit 5: sneak, bit 6: attack, bit 7: interact
+  uint32 key_bitmask = 1; 
+  
+  int32 select_slot = 2;
+  
+  // Continuous (Sürekli) Eylemler
+  float delta_yaw = 3;
+  float delta_pitch = 4;
+  string agent_id = 5; // YENİ EKLENDİ
+}

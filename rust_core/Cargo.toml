@@ -1,0 +1,20 @@
+[package]
+name = "rust_core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+azalea = "0.16.0"
+azalea-entity = "0.16.0"
+azalea-client = "0.16.0"
+tokio = { version = "1.52.3", features = ["full"] }
+tonic = "0.14.6"
+tonic-prost = "0.14.6"
+prost = "0.14.3"
+anyhow = "1.0.95"
+tokio-stream = "0.1.17"
+once_cell = "1.19.0"
+
+[build-dependencies]
+tonic-prost-build = "0.14.6"
+protoc-bin-vendored = "3.0.0"

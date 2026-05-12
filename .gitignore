@@ -1,0 +1,22 @@
+# Rust
+**/target/
+rust_core/Cargo.lock
+
+# Python
+**/__pycache__/
+**/*.pyc
+python_brain/venv/
+python_brain/runs/
+python_brain/brain.pth
+
+# Environments
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

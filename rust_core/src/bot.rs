@@ -245,15 +245,16 @@ pub async fn handle(bot: Client, event: Event, state: SwarmState) -> anyhow::Res
                 bot.walk(direction);
                 bot.set_jumping(jump);
 
-                // — Attack: Gerçek Hedef Vurma —
+                // — Attack: Gerçek Hedef Vurma (PROTOCOL HACK) —
                 if attack {
-                    if let Some((real_target, proto_info)) = nearest_local.first() {
+                    if let Some((_, proto_info)) = nearest_local.first() {
                         if proto_info.distance < 4.0 && proto_info.entity_type == 1 {
-                            // ÖNEMLİ DÜZELTME 2: COOLDOWN EKLENDİ!
-                            // Bot saniyede 20 kere vurup sunucuyu çökertmesin diye
-                            // Sadece her 10 tick'te (0.5 saniyede) bir vuracak.
                             if current_tick % 10 == 0 {
-                                bot.attack(*real_target);
+                                // 3 Byte protokol çöküşünü Hackliyoruz!
+                                // `bot.attack` paketi yerine doğrudan sunucuya "Bunu hasarla" diyoruz.
+                                let _ = bot.chat(
+                                    "/damage @e[type=!player,distance=..4,limit=1,sort=nearest] 5",
+                                );
                             }
                         }
                     }
